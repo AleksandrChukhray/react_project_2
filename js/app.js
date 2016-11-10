@@ -98,13 +98,31 @@ var App = React.createClass({
     propTypes: {
         //data: React.PropTypes.array.isRequired
     },
+    getInitialState: function(){
+        return {
+            news: some_news
+        }
+    },
+    componentDidMount : function(){
+        /*
+        * слушай событие "создана новость"
+        * если событие произошло, обнови this.state.news
+        * */
+    },
+    componentWillUnmount: function(){
+        /*
+        * Больше не слушай событие "Создана новость"
+        * */
+    },
     render: function () {
+        console.log('render');
         return (
             <div className="app">
                 <h3>Новости</h3>
                 <UncontrolledTestInput />
                 <TestInput />
-                <News data={some_news}/> {/*  добавили свойства data*/}
+                <News data={this.state.news}/> {/*  data={some_news} добавили свойства data*/}
+                <Add />
             </div>
         )
     }
@@ -158,6 +176,83 @@ var UncontrolledTestInput = React.createClass({
                 />
                 <button onClick={this.onBtnClickHandler}>Показать alert !!!</button>
             </div>
+        )
+    }
+});
+
+var Add = React.createClass({
+    onButtonClickHandler: function(){
+        var author =  ReactDOM.findDOMNode(this.refs.author).value,
+            news = ReactDOM.findDOMNode(this.refs.text).value;
+
+        alert(author + " " + news);
+    },
+    getInitialState: function(){
+      return{
+          btnIsDisabled : true,
+          authorIsEmpty: true,
+          textIsEmpty: true
+      }
+    },
+    onCheckRuleClick: function(e){
+        this.setState({btnIsDisabled: !this.state.btnIsDisabled}); //изменяет на НЕ то что было
+        //ReactDOM.findDOMNode(this.refs.alert_button).disabled = !e.target.checked;
+    },
+    onChangeInputText : function(e){
+      if(e.target.value.trim().length > 0){
+          this.setState({textIsEmpty : false })
+      }else{
+          this.setState({textIsEmpty: true})
+      }
+    },
+    onChangeInputAuthor : function(e){
+        if(e.target.value.trim().length > 0){
+            this.setState({authorIsEmpty : false })
+        }else{
+            this.setState({authorIsEmpty : true})
+        }
+    },
+    onFieldChange : function(fieldName, e) {
+        if(e.target.value.trim().length > 0){
+            this.setState({[''+fieldName] : false })
+        }else{
+            this.setState({[''+fieldName] : true})
+        }
+    },
+    render: function(){
+        return (
+            <form className="add cf">
+                <input
+                    className="add__author"
+                    onChange = {this.onFieldChange.bind(this, 'authorIsEmpty')}
+                    placeholder="Ваше имя"
+                    ref="author"
+                    type="text"
+                />
+                <textarea
+                    onChange = {this.onFieldChange.bind(this, 'textIsEmpty')}
+                    placeholder="Текст новости"
+                    ref="text"
+                    className="add__text">
+                </textarea>
+                <label className="add__checkrule">
+                    <input
+                        className=""
+                        //defaultChecked={false}
+                        ref="checkrule"
+                        type="checkbox"
+                        onChange = {this.onCheckRuleClick}
+                    /> Я согласен с правилами
+                </label>
+                <button
+                    className="add__btn"
+                    disabled={this.state.btnIsDisabled || this.state.authorIsEmpty || this.state.textIsEmpty}
+                    onClick={this.onButtonClickHandler}
+                    ref="alert_button"
+                >
+                    Добавить новость
+                </button>
+            </form>
         )
     }
 });
