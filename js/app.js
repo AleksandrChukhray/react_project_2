@@ -1,5 +1,7 @@
 // news array
 
+//global var
+window.ee = new EventEmitter();
 
 //model
 var some_news = [
@@ -108,11 +110,21 @@ var App = React.createClass({
         * слушай событие "создана новость"
         * если событие произошло, обнови this.state.news
         * */
+
+        var self = this;
+
+        window.ee.addListener('New.add', function(item){
+            var nextNews = item.concat(self.state.news);
+
+            self.setState({news: nextNews});
+        })
     },
     componentWillUnmount: function(){
         /*
         * Больше не слушай событие "Создана новость"
         * */
+
+        window.ee.removeListener('New.add');
     },
     render: function () {
         console.log('render');
@@ -181,11 +193,22 @@ var UncontrolledTestInput = React.createClass({
 });
 
 var Add = React.createClass({
-    onButtonClickHandler: function(){
+    onButtonClickHandler: function(e){
+        e.preventDefault();
         var author =  ReactDOM.findDOMNode(this.refs.author).value,
-            news = ReactDOM.findDOMNode(this.refs.text).value;
+            news = ReactDOM.findDOMNode(this.refs.text).value,
+            textEl = ReactDOM.findDOMNode(this.refs.text);
 
-        alert(author + " " + news);
+        var item = [{
+            author : author,
+            text : news,
+            bigText: '...'
+        }];
+
+        window.ee.emit('New.add', item);
+
+        textEl.value = '';
+        this.setState({textIsEmpty: true});
     },
     getInitialState: function(){
       return{
